@@ -29,9 +29,12 @@ repositories { // 각종 의존성(라이브러리)들을 어떤 원격 저장�
 }
 
 dependencies { // 프로젝트 개발에 필요한 의존성
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.projectlombok:lombok')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa') // 스프링 부트용 Spring Data Jpa 추상화 라이브러리, 부트 버전에 맞춰 자동으로 JPA 관련 라이브러리 버전 관리
+    compile('com.h2database:h2') // 인메모리 관계형 db, 별도 설치 필요 없이 프로젝트 의존성 만으로도 관리 가능 / 메모리에서 실행 -> 재시작마다 초기화 -> 테스트에 용이
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-    compile('org.springframework.boot:spring-boot-starter-web')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
