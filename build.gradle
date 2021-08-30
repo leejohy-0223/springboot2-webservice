@@ -1,0 +1,40 @@
+buildscript {
+    ext { //build.gradle에서 사용하는 전역 변수를 설정하겠다는 의미
+        springBootVersion = '2.1.7.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+        jcenter() // 간단한 라이브러리 업로드 가능
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'java' // 필수
+apply plugin: 'eclipse' // 필수
+apply plugin: 'org.springframework.boot' // 필수
+apply plugin: 'io.spring.dependency-management' // 필수 - 스프링 부트 의존성들 관리해주는 플러그인
+
+
+//plugins {
+//    id 'java'
+//}
+
+group 'com.leejohy.book'
+version '1.0-SNAPSHOT'
+
+repositories { // 각종 의존성(라이브러리)들을 어떤 원격 저장소에서 받을 지를 정한다. 기본적으로 mavenCentral이지만, 최근에는 라이브러리 업로드 난이도 때문에 jcenter도 많이 사용
+    mavenCentral()
+}
+
+dependencies { // 프로젝트 개발에 필요한 의존성
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    compile('org.springframework.boot:spring-boot-starter-web')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+test {
+    useJUnitPlatform()
+}
