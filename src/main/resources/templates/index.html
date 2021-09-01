@@ -25,7 +25,9 @@
     <tbody id="tbody">
     <tr th:each="post : ${posts}">
         <td th:text="${post.id}">{{id}}</td>
-        <td th:text="${post.title}">{{title}}</td>
+        <td>
+            <a th:href="@{|/posts/update/${post.id}|}" th:text="${post.title}">aaa</a>
+        </td>
         <td th:text="${post.author}">{{author}}</td>
         <td th:text="${post.modifiedDate}">{{modifiedDate}}</td>
     </tr>
