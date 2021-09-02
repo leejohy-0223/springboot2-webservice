@@ -28,8 +28,8 @@ public class IndexControllerTest {
 
 
         //then
-        assertThat(body).contains("스프링 부트로 시작하는 웹 서비스"); // 결과 html에 이게 포함되어 있다.
-        assertThat(body).contains("meta http-equiv="); // 결과 html에 이게 포함되어 있다.
-        assertThat(body).doesNotContain("xmlns:th="); // 타임리프 문법은 다 사라져서 반환되므로 포함되지 않는게 맞다.
+        assertThat(body).contains("스프링부트로 시작하는 웹 서비스"); // 결과 html에 이게 포함되어 있다.
+//        assertThat(body).contains("meta http-equiv="); // 결과 html에 이게 포함되어 있다.
+//        assertThat(body).doesNotContain("xmlns:th="); // 타임리프 문법은 다 사라져서 반환되므로 포함되지 않는게 맞다.
     }
 }
