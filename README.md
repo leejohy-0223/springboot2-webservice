@@ -46,5 +46,32 @@
   - 등록 / 수정 / 삭제 기능이 전혀 없는 서비스 메서드에 사용하자.
   
   
-## 9/1
+## 9/2
   
+1. SecurityConfig(extends WebSecurityConfigurerAdapter)  
+  
+   - @EnableWebSecurity를 통해 스프링 시큐리티를 활성화한다.
+   - configure를 overriding하고, 설정 코드를 작성한다.
+   - .userService(customOAuth2UserService) -> 소셜 로그인 성공 시, OAuth2UserService를 구현한 Service를 통해 후속 조치를 진행한다.
+     - 리소스 서버(즉, 소셜 서비스들)에서 사용자 정보를 가져온 상태에서 추가로 진행하고자 하는 기능을 명시할 수 있다.
+    
+2. OAuth2UserService(Custom)
+  
+   - 크게는, LoadUser 메서드를 구현하여 OAuth2User를 반환한다. 이 결과로 로그인 기능이 작동한다.
+  
+   - OAuth2UserRequest : Google에 요청하는 어플리케이션의 요청 값들 포함(registrationId, ClientId, password, token)
+     - registrationId : Google / naver / kakao 등 구분용
+     - userNameAttributeName : OAuth2 로그인 진행 시 키가 되는 필드 값(PK 같은 의미), 기본은 sub(네이버, 카카오는 지원 안함)
+  
+   - OAuthUser : 개인 정보 포함
+     - OAuthUser.getAttributes -> Map<String, Object> 반환. 각각 개인 정보가 key-value 쌍으로 들어 있다.
+  
+   - registrationId, userNameAttributeName, oAuth2User.getAttributes()를 통해 User를 save or update 한 후, user 클래스를 Dto로 변환하여 세션에 저장한다.
+  
+   - 마지막으로 new DefaultOAuth2User에 userRolekey, attributes, attribute key를 넣어 반환한다. 
+     - 이 때, userRoleKey는 Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey()))와 같이 만들어진다.
+     - Collections.singleton의 결과로 유일무이한 1개의 객체만을 가지는 Set이 반환된다. 해당 set을 대상으로 add, remove, clear가 불가능한데, immutable 하기 때문이다.
+     - 참고 : https://stackoverflow.com/questions/31599467/what-is-the-benefit-for-collections-singleton-to-return-a-set-instead-of-a-col
+  
+  
+ 
