@@ -74,4 +74,11 @@
      - 참고 : https://stackoverflow.com/questions/31599467/what-is-the-benefit-for-collections-singleton-to-return-a-set-instead-of-a-col
   
   
- 
+## 9/4
+  
+- 앞서, page 119에서 JPA Auditing(날짜 자동 생성)을 위해 main Application에 @EnableJpaAuditing을 사용했다.
+  
+   - @EnableJpaAuditing을 위해선 최소 하나의 @Entity 클래스가 필요하다. @WebMvcTest는 당연히 없다.
+   - 따라서 Application에서 @EnableJpaAuditing을 제거하고, 별도의 config 클래스를 만들어 그 위에 선언한다.
+   - 해당 클래스에 추가로 @Configuration을 작성한다. @WebMvcTest에서는 @Configuration을 스캔하지 않는다.
+   - 하지만 @WebMvcTest에서 WebSecurityConfigurer 빈은 스캔하게 된다.
