@@ -81,4 +81,5 @@
    - @EnableJpaAuditing을 위해선 최소 하나의 @Entity 클래스가 필요하다. @WebMvcTest는 당연히 없다.
    - 따라서 Application에서 @EnableJpaAuditing을 제거하고, 별도의 config 클래스를 만들어 그 위에 선언한다.
    - 해당 클래스에 추가로 @Configuration을 작성한다. @WebMvcTest에서는 @Configuration을 스캔하지 않는다.
-   - 하지만 @WebMvcTest에서 WebSecurityConfigurer 빈은 스캔하게 된다.
+   - 하지만 @WebMvcTest에서 WebSecurityConfigurer 빈은 스캔하게 된다. 그래서 SecurityConfig는 읽었지만(?), 내부의 service를 읽을 수가 없어 에러가 발생한다.
+   - 따라서 excludeFilters를 통해 SecurityConfig를 스캔 대상에서 제외시켜줘야 한다.
