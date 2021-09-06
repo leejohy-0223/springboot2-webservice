@@ -17,7 +17,26 @@ cache:
 # master branch로 push 될 때 수행하는 명령어(프로젝트의 gradlew를 통해 clean & build 수행)
 script: "./gradlew clean build"
 
-# CI 실행 완료 시 메일로 알람
+#deploy가 실행되기 전에 수행. CodeDeploy는 jar 인식 못하므로, jar + 기타 파일을 모아 zip으로 압축한다.
+before_deploy:
+  - zip -r leejohy-springboot2-webservice *
+  - mkdir -p deploy
+  - mv leejohy-springboot2-webservice.zip deploy/leejohy-springboot2-webservice.zip
+
+# s3로 파일 업로드 혹은 CodeDeploy로 배포 등 외부 서비스와 연동될 행위를 선언한다.
+deploy:
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY # travis repo settings에 설정된 값
+    secret_access_key: $AWS_SECTRET_KET
+
+    bucket: leejohy-springboot-build # s3 버킷
+    region: ap-northest-2
+    skip_cleanup: true
+    acl : private # zip file 접근을 private으로
+    local_dir: deploy # before_deploy에서 생성한 디렉토리, 이 위치의 파일들만 s3로 전송한다.
+    wait_until_deployed: true
+
+# CI 실행 완료 시 메일로 알람. 빌드 queue에 걸려서 다시 Push
 notifications:
   email:
     recipients:
