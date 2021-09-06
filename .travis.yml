@@ -27,7 +27,7 @@ before_deploy:
 deploy:
   - provider: s3
     access_key_id: $AWS_ACCESS_KEY # travis repo settings에 설정된 값
-    secret_access_key: $AWS_SECRET_KET
+    secret_access_key: $AWS_SECRET_KEY
 
     bucket: leejohy-springboot-build # s3 버킷
     region: ap-northest-2
