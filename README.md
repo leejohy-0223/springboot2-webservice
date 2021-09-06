@@ -120,3 +120,11 @@
   - AWS에서는 관리형 서비스인 RDS(Relational Database Service)를 지원한다. 
   - 하드웨어 프로비저닝(사용자 대신 하드웨어 인프라 설정해서 제공), 데이터베이스 설정, 패치 & 작업 등을 자동화 하여 개발자가 개발에만 집중할 수 있도록 한다.
   - MariaDB(프리티어 대상)으로 설정, 이후에 규모가 커지면 Aurora로 교체
+  - 구축 후, 파라미터 그룹 생성 -> time zone, character set 변경 -> 생성된 파라미터 그룹을 데이터베이스에 연결
+  
+- IntelliJ & EC2와 DB 연동하기
+  
+  - 공통 : 데이터베이스 보안그룹 -> VPC 보안그룹에서 RDS 보안 그룹의 인바운드로 내 IP(IntelliJ를 위한)와 EC2의 보안그룹 ID를 추가한다.
+  - IntelliJ : Database탭에 엔드포인트, id, password 입력해서 연결 완료(인텔리제이 기본 버전은 plug-in : database browser 설치)
+     - alter database 데이터베이스 명을 통해 character set(문자 집합), collate(데이터베이스에서 검색이나 정렬과 같은 작업을 할 때 사용하는 비교를 위한 규칙의 집합) 변경 가능하다(데이터베이스 전체 특성)
+  - EC2 : ssh 접속 후, "sudo yum install mysql"을 통해 mysql 설치한다. 이후 "mysql -u 계정 -p -h host주소'를 통해 RDS로 접속할 수 있다.(show database로 확인!)
