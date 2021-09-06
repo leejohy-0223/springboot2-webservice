@@ -36,6 +36,19 @@ deploy:
     local_dir: deploy # before_deploy에서 생성한 디렉토리, 이 위치의 파일들만 s3로 전송한다.
     wait_until_deployed: true
 
+  - provider: codedeploy
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+
+    bucket: leejohy-springboot-build
+    key: springboot2-webservice.zip
+
+    bundle_type: zip
+    application: leejohy-springboot2-webservice
+    deployment_group: leejohy-springboot2-webservice-group
+    region: ap-northeast-2
+    wait_until_deployed: true
+
 # CI 실행 완료 시 메일로 알람. 빌드 queue에 걸려서 다시 Push
 notifications:
   email:
