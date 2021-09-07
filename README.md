@@ -128,3 +128,9 @@
   - IntelliJ : Database탭에 엔드포인트, id, password 입력해서 연결 완료(인텔리제이 기본 버전은 plug-in : database browser 설치)
      - alter database 데이터베이스 명을 통해 character set(문자 집합), collate(데이터베이스에서 검색이나 정렬과 같은 작업을 할 때 사용하는 비교를 위한 규칙의 집합) 변경 가능하다(데이터베이스 전체 특성)
   - EC2 : ssh 접속 후, "sudo yum install mysql"을 통해 mysql 설치한다. 이후 "mysql -u 계정 -p -h host주소'를 통해 RDS로 접속할 수 있다.(show database로 확인!)
+  
+- EC2 서버에 프로젝트 배포하기
+    
+  - issue : IntelliJ에서 test all pass 확인 후, ec2에 clone해서 ./gradlew test 결과, test 실패 확인
+     -> 문제는 이전에 test/resource 내의 application.properties를 지워버린것. 테스트에서는 구글 로그인 연동 필요 없으므로, id / password를 임의로 설정하고 github에 추가해서 다시 build하니 성공
+  - 프로젝트 수정 후 push 했다면, 해당 프로젝트 폴더 안에서 git pull 하면 자동으로 업데이트 된다.
