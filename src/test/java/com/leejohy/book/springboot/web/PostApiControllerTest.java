@@ -73,9 +73,9 @@ public class PostApiControllerTest {
                 .content(content)
                 .author("author")
                 .build();
-
         String url = "http://localhost:" + port + "/api/v1/posts";
 
+        System.out.println("url = " + url);
         //when
 //        ResponseEntity<Long> responseEntity = restTemplate.postForEntity(url, requestDto, Long.class);
         mvc.perform(post(url)
