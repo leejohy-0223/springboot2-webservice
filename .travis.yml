@@ -19,9 +19,13 @@ script: "./gradlew clean build"
 
 #deploy가 실행되기 전에 수행. CodeDeploy는 jar 인식 못하므로, jar + 기타 파일을 모아 zip으로 압축한다.
 before_deploy:
-  - zip -r springboot2-webservice *
-  - mkdir -p deploy
-  - mv springboot2-webservice.zip deploy/springboot2-webservice.zip
+  - mkdir -p before-deploy
+  - cp scripts/*.sh before-deploy/
+  - cp appspec.yml before-deploy/
+  - cp build/libs/*.jar before-deploy/
+  - cd before-deploy && zip -r before-deploy *
+  - cd ../ && mkdir -p deploy
+  - mv before-deploy/before-deploy.zip deploy/springboot2-webservice.zip
 
 # s3로 파일 업로드 혹은 CodeDeploy로 배포 등 외부 서비스와 연동될 행위를 선언한다.
 deploy:
