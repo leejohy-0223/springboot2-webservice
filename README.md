@@ -133,4 +133,95 @@
     
   - issue : IntelliJ에서 test all pass 확인 후, ec2에 clone해서 ./gradlew test 결과, test 실패 확인
      -> 문제는 이전에 test/resource 내의 application.properties를 지워버린것. 테스트에서는 구글 로그인 연동 필요 없으므로, id / password를 임의로 설정하고 github에 추가해서 다시 build하니 성공
-  - 프로젝트 수정 후 push 했다면, 해당 프로젝트 폴더 안에서 git pull 하면 자동으로 업데이트 된다.
+  - 프로젝트 수정 후 push 했다면, 해당 프로젝트 폴더 안에서 git pull을 통해 최신 push 파일을 가져올 수 있다.
+  - 현재 EC2엔 그레이들 설치 안했으나, Gradle task를 수행할 수 있다. 이는 gradlew 때문인데, 그레이들 설치되지 않은 환경 / 버전이 다른 상황에서도 해당 프로젝트에 한해 그레이들을 쓸 수 있도록 지원하는 Wrapper 파일이다. 따라서 별도로 설치할 필요 없다.
+
+## 9/7
+  
+- EC2 배포 스크립트 만들기
+  
+  - 배포 : git clone / pull을 통해 새 버전의 프로젝트를 받음 & Gradle / Maven을 통한 프로젝트 테스트와 빌드 / EC2 서버에서 해당 프로젝트를 실행 및 재실행
+     - 배포 자동화를 위해 shell script를 작성한다. 
+  - linux 명령어
+     - ps(process status) : 현재 실행중인 프로세스 목록 & 상태 보여줌
+     - pgrep(ps + grep) : process 상태 보여줌과 동시에 grep을 통해 원하는 정보를 출력할 수 있다. -> pgrep -f : use full process name to match, 즉 프로세스와 매칭되는 Pid를 출력한다.
+     - if [ 값1 조건식 값2 ]; then ~ fi : 조건문(https://jink1982.tistory.com/48)
+     - if [ -z "$CURRENT_PID" ] ~ : current_pid의 길이가 0이면 참이 되어 ~부분이 실행된다. -n 옵션은 반대로 current_pid 길이가 1이상이면(즉 존재하면) 참이 된다.
+     - kill -9 pid : 프로세스 id를 이용하여 프로세스를 강제 종료(저장 안한 데이터 소멸)
+     - kill -15 pid(default = termination) : 프로세스 id를 이용해서 프로세스를 정상 종료(TERM 시그널 (기본 옵션), 자신이 하던 작업을 모두 안전하게 종료하는 절차를 밟는다. 메모리상에 있는 데이터와 각종 설정/환경 파일을 안전하게 저장한 후 프로세스를 종료한다.
+     - ls -tr $Repository/ | grep jar | tail -n 1 : ls로 -tr, 즉 시간 순으로 우선 정렬한다.(-t는 시간의 역순) 그 리스트에서 "jar"이라는 텍스트를 포함한 문장, 즉 파일이름을 찾고 여러개 일 수 있으므로, tail -n 1을 통해 가장 나중의 jar 파일을 출력한다. 
+     - nohup : 애플리케이션 실행자가 터미널 종료해도 애플리케이션 계속 구동되도록 이 명령어를 사용한다.
+     - nohup java -jar ~ 2>&1 & : nohup은 실행 시 nohup.out이라는 파일을 생성하고, 뒤의 명령을 수행하면서 발생되는 로그를 기록한다. 2>&1을 통해 표준에러를 표준 출력으로 redirect하므로, 에러도 함께 log(nohup.out)으로 기록된다.
+     - * 0:표준입력 / 1:표준출력 / 2:표준에러(출력)
+   
+  - 스프링 부트의 장점으로, 특별히 외장 톰캣을 설치할 필요 없으며, 내장 톰캣을 사용해서 jar 파일만 있으면 바로 웹 애플리케이션 서버를 실행할 수 있다. 
+  
+
+- 외부 Security 파일 등록
+  
+    - -Dspring.config.location : 스프링 설정 파일 위치를 저장한다. classpath:/가 붙을 경우, jar안에 있는 resource 디렉터리를 기준으로 경로가 생성된다.
+  
+ 
+- 스프링 부트 프로젝트로 RDS 접근
+  
+    - 테이블 생성 : JPA에서 사용될 엔티티 테이블 / 스프링 세션이 사용될 테이블 2가지 종류를 직접 생성한다. 스프링 세션 테이블은 schema-mysql.sql 파일에서 확인할 수 있다.
+  
+    - 프로젝트 생성 : 자바 프로젝트가 MariaDB에 접근하려면 데이터베이스 드라이버가 필요하다. build.gradle에 mariaDB 드라이버 추가한다.
+      - 추가로, application-real.properties 파일을 추가한다. 이는 profile=real인 환경(=스프링의 profile)이 구성된다. 보안 / 로그상 이슈가 될 만한 설정을 모두 제거
+      - application-xxx.properties를 가진 이름을 통해 -Dispring.profiles.active=xxx와 같이 properties를 활성화시킬 수 있다.
+      - properties 내에 spring.profiles.include를 통해 다른 properties를 함께 사용할 수 있다. 
+      - 개별적으로 @configuration이 붙은 클래스에 @Profiles를 통해 각각 다른 빈들로 정의해서 사용할 수도 있다. 이 때는 properties 안의 파일에 spring.profiles.active = Profile 이름을 작성해서 사용하면 된다.
+  
+    - EC2 설정 : 소셜 로그인 기능을 활성화 한다. 
+      - 인스턴스에서 퍼블릭 DNS를 통해 EC2 서버에 접근할 수 있다.(EC2 서버에 자동으로 할당된 도메인)
+      - 구글 / 네이버의 로그인 서비스에 EC2의 도메인을 등록하지 않았기 때문에 로그인 기능을 사용할 수 없다.
+      - 구글에 EC2 주소 등록 : 웹 콘솔 접속 -> API 및 서비스 -> OAuth 동의 화면에서 http:// 없이 EC2의 퍼블릭 DNS를 등록한다. 이후 사용자 인증정보 탭에 8080/login/oauth2/code/google을 추가하여 승인된 리다이렉션 uri에 등록한다.
+      - 네이버에 EC2 주소 등록 : 네이버 개발자 센터 -> 내 애플리케이션 -> API 설정에 들어간다. 서비스 URL에 EC2 퍼블릭 DNS 등록(http:// 같이), 네아로(callback URL)에 전체 주소 등록
+      - 서비스 url : 로그인을 시도하는 서비스가 네이버에 등록된 서비스인지 확인하는 항목
+      - callback url : 인증된 후 리디렉션 되는 애플리케이션의 경로이다.
+
+- 문제 : 수동 실행되는 Test, 수동 build(Merge 이상이 없는지는 build를 수행해야만 알 수 있다)
+  
+  
+
+- Travis CI 배포 자동화 : 깃허브에 push 하면 자동으로 Test & build & deploy가 되는 환경 구축해보자.
+
+  - CI(Continuous Integration - 지속적 통합) : VCS 시스템에 push가 되면 자동으로 테스트 & 빌드가 수행되어 안정적인 배포 파일을 만드는 과정 (테스팅 자동화가 가장 중요)
+  - CD(Continuous Deployment - 지속적인 배포) : 이 빌드 결과를 자동으로 운영 서버에 무중단 배포까지 진행하는 과정
+  
+  - Travis CI : 깃허브에서 제공하는 무료 CI 서비스. (회사에서는 Jenkins 사용)
+     - 기본 설정은 프로젝트 내에 .travis.yml을 만들어서 관리한다.
+     - yml : json에서 괄호를 제거한 것
+     - .travis.yml을 작성한 후 master branch에 push 하면, travis에서 자동으로 설정파일을 읽어들이고 build를 진행한다.
+  
+  
+  1. Travis CI와 AWS S3 연동하기
+  
+     - AWS S3(Simple Storage Service) : 일종의 파일 서버. 이미지 파일 비롯한 정적 파일 관리 & 배포 파일 관리
+     - 첫 번째로 Travis CI와 S3를 연동한다. 배포는 AWS CodeDeploy 활용
+     - CodeDeploy에는 코드 저장 기능이 없다. 따라서 Travis CI가 빌드한 결과를 받아 CodeDeploy가 가져갈 수 있도록 보관하는 공간이 필요하다. 이를 위해 S3가 필요하다.
+     - AWS Key 발급 : 일반적으로 AWS 서비스에 외부 서비스 접근 불가, 따라서 IAM(Identity and Access Management) 서비스를 통해 key를 생성해서 사용한다.
+     - IAM을 통해 Travis CI(외부 서비스)가 S3, CodeDeploy(AWS 서비스)에 접근할 수 있도록 권한을 부여하자. IAM에서 엑세스 키와 비밀 엑세스 키를 발급 받아 Travis에서 사용하면 된다.
+     - 키를 Travis에 $AWS_ACCESS_KEY와 같은 이름으로 등록한 후, .travis.yml에서 이 값을 사용할 수 있다.
+     - before_deploy : 배포 전 설정을 작성한다. CodeDeploy는 jar을 인식 못하므로, 모든 빌드 파일을 zip으로 만든 후 deploy/~.zip과 같은 구조로 만든다.
+     - deploy : S3 파일 업로드 혹은 CodeDeploy로 배포 등 외부 서비스와 연동될 행위를 선언한다. 주로 acl(access control list), local_dir(before_deploy에서 생성한 디렉토리)를 설정
+     - 여기에서는 Travis CI에서 만든 zip 파일을 'deploy' 폴더에서 가져간다.
+  
+  2. Travis CI와 S3, CodeDeploy 까지 연동하기
+  
+     - EC2가 배포 대상이므로, CodeDeploy - EC2간 IAM 역할을 추가해야 한다.
+     - 역할 : AWS 서비스에서만 할당할 수 있는 권한 / 사용자 : AWS 서비스 외에 사용할 수 있는 권한(Travis CI) 차이가 있다.
+     - 서비스는 EC2(여기에서 사용할꺼기 때문), 정책은 AmazonEC2RoleForAWSCodeDeploy로 설정한다. 이 역할을 EC2의 IAM 역할 연결을 통해 할당한다. 그리고 EC2를 재부팅한다.
+  
+     - CodeDeploy 에이전트 설치 : CodeDeploy 요청을 받기 위한 에이전트 역할
+     - EC2 접속 -> aws s3 cp s3://aws-codedeploy-ap-northeast-2/latest/install .--region ap-northeast-2를 통해 s3에서 codedeploy 에이전트를 다운받을 수 있다.
+     - cp에서 인자 2개가 반대로 되면 s3로 업로드하는거니 참고
+     - CodeDeploy에서 EC2로 접근하려면 마찬가지로 권한이 필요하다. 마찬가지로 역할을 생성한다. 역할 하나밖에 없어 무조건 그걸로 생성한다. 역할 생성 후 애플리케이션 생성 시 역할 및 배포 그룹 지정한다.
+     - appspec.yml : aws codeDeploy 설정, source(destination으로 이동할 대상 지정), destination(source에서 저장된 파일을 받을 위치)
+     - .travis.yml : key = 전달할 파일, bundle_time = 압축 확장자
+     - 모든 내용 작성 후 프로젝트 커밋 & 푸시 하면, Travis CI 자동 빌드 실행된다. 이후 CodeDeploy에서 배포가 수행되고, 지정된 destination으로 zip이 풀려서 도착하게 된다.
+  
+     - background에서 돌아가는 nohup -> ps -ef | grep “keyword”를 통해 pid 알아낸 후 termination 시킨다.
+     - build.gradle의 springBootVersion으로 인해 내부 dependencies 의존성들이 관리가 된다. 따라서 dependencies에는 따로 버전을 명시하지 말도록 하자..
+  
+  
