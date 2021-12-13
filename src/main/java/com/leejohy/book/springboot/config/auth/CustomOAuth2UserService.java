@@ -57,8 +57,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         System.out.println("========attribute=============");
         Set<String> strings = attributes1.keySet();
         for (String string : strings) {
-            System.out.println(attributes1.get(string));
-            System.out.println("=======Object==============");
+            System.out.println("key : " + string + ", value : " + attributes1.get(string));
+//            System.out.println("=======Object==============");
         }
         System.out.println("========attribute end=============");
         User user = saveOrUpdate(attributes);
