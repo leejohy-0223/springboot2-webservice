@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class) // 테스트 진행 시 Junit에 내장된 실행자 외에 다른 실행자를 실행시킨다.
 // 여러 스프링 어노테이션 중, Web(Spring MVC)에 집중할 수 있는 어노테이션. @Controller 등 사용 가능하다.(service, component, repository는 사용 불가)
+// @WebMvcTest(controllers = HelloController.class)
 @WebMvcTest(controllers = HelloController.class,
         excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)

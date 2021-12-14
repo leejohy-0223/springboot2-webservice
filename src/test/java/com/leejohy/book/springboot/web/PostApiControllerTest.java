@@ -39,7 +39,7 @@ public class PostApiControllerTest {
     private int port;
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private TestRestTemplate restTemplate; // 이거 쓰려면 webEnvironment 필요 (null만 아니면 됨)
 
     @Autowired
     private PostsRepository postsRepository; // jpa 기능까지 한꺼번에 테스트 시, @SpringBootTest + restTemplate 사용
@@ -77,13 +77,17 @@ public class PostApiControllerTest {
 
         System.out.println("url = " + url);
         //when
-//        ResponseEntity<Long> responseEntity = restTemplate.postForEntity(url, requestDto, Long.class);
+       ResponseEntity<Long> responseEntity = restTemplate.postForEntity(url, requestDto, Long.class);
+
         mvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(new ObjectMapper().writeValueAsString(requestDto)))
                 .andExpect(status().isOk());
 
         //then
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FOUND); // security 설정으로 인한 redirect 발생
+
         List<Posts> all = postsRepository.findAll();
         assertThat(all.get(0).getTitle()).isEqualTo(title);
         assertThat(all.get(0).getContent()).isEqualTo(content);
@@ -112,7 +116,7 @@ public class PostApiControllerTest {
         HttpEntity<PostsUpdateRequestDto> requestEntity = new HttpEntity<>(requestDto);
 
         //when
-//        ResponseEntity<Long> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Long.class); // put은 이렇게 요청하나?
+       // ResponseEntity<Long> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Long.class); // put은 이렇게 요청하나?
         mvc.perform(put(url)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(new ObjectMapper().writeValueAsString(requestDto)))

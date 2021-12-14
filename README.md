@@ -22,8 +22,9 @@
   - SpringBootTest + TestRestTemplate를 통해 JPA의 기능까지 통합해서 테스트할 수 있다.(WebMvcTest는 단위테스트)
     - TestRestTemplate 사용하기 위해서 SpringBootTest에 webEnvironment 정의가 필요하다. 여기에서는 Random port를 지정해줬다.
     - TestRestTemplate을 사용해서 @Controller 메서드에 직접 요청을 날리고 응답을 받아올 수 있다.
-    - 예로, postForEntity(url, requestDao, Long.class) -> url로 requestDao를 전달하고, ResponseEntity<Long -> controller의 반환형>을 반환받는다.
+    - 예로, postForEntity(url, requestDao, Long.class) : url로 requestDao를 전달하고, ResponseEntity<Long : controller의 반환형>을 반환받는다.
     
+
 - h2 데이터베이스를 메모리에서 실행 => 직접 접근하려면 웹 콘솔을 사용해야 한다.
   - 옵션 : spring.h2.console.enable=true
   - Application main 실행 -> localhost:8080/h2-console로 접근한다.(jdbc url : jdbc:h2:mem:testdb)
@@ -45,6 +46,7 @@
 - @Transactional(readOnly = true) 옵션을 통해 트랜잭션 범위는 유지하되, 조회 기능만 남겨두어 조회 속도를 개선시킬 수 있다.
   - 등록 / 수정 / 삭제 기능이 전혀 없는 서비스 메서드에 사용하자.
   
+<br>
   
 ## 9/2
   
@@ -74,6 +76,8 @@
      - 참고 : https://stackoverflow.com/questions/31599467/what-is-the-benefit-for-collections-singleton-to-return-a-set-instead-of-a-col
   
   
+<br>
+
 ## 9/4
   
 - 앞서, page 119에서 JPA Auditing(날짜 자동 생성)을 위해 main Application에 @EnableJpaAuditing을 사용했다.
@@ -84,6 +88,7 @@
    - 하지만 @WebMvcTest에서 WebSecurityConfigurer 빈은 스캔하게 된다. 그래서 SecurityConfig는 읽었지만(?), 내부의 service를 읽을 수가 없어 에러가 발생한다.
    - 따라서 excludeFilters를 통해 SecurityConfig를 스캔 대상에서 제외시켜줘야 한다.
   
+<br>
   
 ## 9/6
 - AWS 환경 구축
@@ -135,6 +140,8 @@
      -> 문제는 이전에 test/resource 내의 application.properties를 지워버린것. 테스트에서는 구글 로그인 연동 필요 없으므로, id / password를 임의로 설정하고 github에 추가해서 다시 build하니 성공
   - 프로젝트 수정 후 push 했다면, 해당 프로젝트 폴더 안에서 git pull을 통해 최신 push 파일을 가져올 수 있다.
   - 현재 EC2엔 그레이들 설치 안했으나, Gradle task를 수행할 수 있다. 이는 gradlew 때문인데, 그레이들 설치되지 않은 환경 / 버전이 다른 상황에서도 해당 프로젝트에 한해 그레이들을 쓸 수 있도록 지원하는 Wrapper 파일이다. 따라서 별도로 설치할 필요 없다.
+
+<br>
 
 ## 9/7
   
@@ -225,3 +232,8 @@
      - build.gradle의 springBootVersion으로 인해 내부 dependencies 의존성들이 관리가 된다. 따라서 dependencies에는 따로 버전을 명시하지 말도록 하자..
   
   
+<br>
+
+## 12/14 복습
+
+- RunWith(SpringRunner.class) : 테스트 진행 시 JUnit에 내장된 실행자 외에 다른 실행자를 실행시킨다.

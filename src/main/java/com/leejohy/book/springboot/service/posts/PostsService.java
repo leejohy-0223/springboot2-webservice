@@ -37,7 +37,7 @@ public class PostsService {
         Posts entity = postsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
 
-        return new PostsResponseDto(entity);
+        return new PostsResponseDto(entity); // DTO로 변환해서 반환한다.
     }
 
     @Transactional(readOnly = true)

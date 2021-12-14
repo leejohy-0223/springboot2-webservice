@@ -2,9 +2,9 @@ buildscript {
     ext { //build.gradle에서 사용하는 전역 변수를 설정하겠다는 의미
         springBootVersion = '2.1.7.RELEASE'
     }
-    repositories {
+    repositories { // 각종 의존성(라이브러리)들을 어떤 원격 저장소에서 받을지를 정한다.
         mavenCentral()
-        jcenter() // 간단한 라이브러리 업로드 가능
+        jcenter() // 직접 만든 library 업로드를 간단하게 하고자 함.
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
